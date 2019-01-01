@@ -1,13 +1,13 @@
 {
   "main.css": "/matrix-calculator/static/css/main.bc363383.chunk.css",
-  "main.js": "/matrix-calculator/static/js/main.ecc3f85a.chunk.js",
-  "main.js.map": "/matrix-calculator/static/js/main.ecc3f85a.chunk.js.map",
+  "main.js": "/matrix-calculator/static/js/main.6a66a42d.chunk.js",
+  "main.js.map": "/matrix-calculator/static/js/main.6a66a42d.chunk.js.map",
   "static/js/1.426fb1ec.chunk.js": "/matrix-calculator/static/js/1.426fb1ec.chunk.js",
   "static/js/1.426fb1ec.chunk.js.map": "/matrix-calculator/static/js/1.426fb1ec.chunk.js.map",
   "runtime~main.js": "/matrix-calculator/static/js/runtime~main.00d9afcb.js",
   "runtime~main.js.map": "/matrix-calculator/static/js/runtime~main.00d9afcb.js.map",
   "static/css/main.bc363383.chunk.css.map": "/matrix-calculator/static/css/main.bc363383.chunk.css.map",
   "index.html": "/matrix-calculator/index.html",
-  "precache-manifest.13ca3613a47c6979606710765d0c9ee5.js": "/matrix-calculator/precache-manifest.13ca3613a47c6979606710765d0c9ee5.js",
+  "precache-manifest.32427a3e6793f33ed8b1131d84cf8edc.js": "/matrix-calculator/precache-manifest.32427a3e6793f33ed8b1131d84cf8edc.js",
   "service-worker.js": "/matrix-calculator/service-worker.js"
 }
