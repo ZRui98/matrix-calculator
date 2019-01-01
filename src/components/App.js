@@ -106,6 +106,9 @@ class App extends Component {
   createMatrixData = (rows, columns) => Array(rows).fill().map(() => Array(columns).fill('0'));
 
   changeColumns = (newColumns, matrixID) => {
+    if (newColumns < 0) {
+      return;
+    }
     const matrix = this.findMatrix(matrixID);
     const { columns: oldColumns, data: matrixData } = matrix;
     matrixData.forEach((row) => {
@@ -126,6 +129,9 @@ class App extends Component {
   }
 
   changeRows = (newRows, matrixID) => {
+    if (newRows < 0) {
+      return;
+    }
     const matrix = this.findMatrix(matrixID);
     const { rows: oldRows, columns, data: matrixData } = matrix;
     let deltaRows = newRows - oldRows;
@@ -142,20 +148,6 @@ class App extends Component {
     matrix.data = matrixData;
     this.changeMatrix(matrixID, matrix);
     this.removeResultMatrix();
-  }
-
-  changeAllRows = (newRows) => {
-    const { matrices } = this.state;
-    matrices.filter(matrix => matrix.type !== 'input').forEach(
-      matrix => this.changeRows(newRows, matrix.ID),
-    );
-  }
-
-  changeAllColumns = (newColumns) => {
-    const { matrices } = this.state;
-    matrices.filter(matrix => matrix.type !== 'input').forEach(
-      matrix => this.changeColumns(newColumns, matrix.ID),
-    );
   }
 
   changeMatrix = (matrixID, matrix) => {
