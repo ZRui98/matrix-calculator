@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/zrui98.github.io/matrix-calculator/precache-manifest.e0642a1021361a326cb8b3496c01b845.js"
+  "matrix-calculator/precache-manifest.fa7db8678243d5cd40495adb90763f65.js"
 );
 
 workbox.clientsClaim();
@@ -28,7 +28,7 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerNavigationRoute("/zrui98.github.io/matrix-calculator/index.html", {
+workbox.routing.registerNavigationRoute("matrix-calculator/index.html", {
   
   blacklist: [/^\/_/,/\/[^\/]+\.[^\/]+$/],
 });
