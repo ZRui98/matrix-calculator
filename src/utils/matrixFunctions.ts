@@ -1,4 +1,6 @@
 import math from 'mathjs';
+
+const rules = [{l: 'n1*(n2+n3)', r: 'n1*n2+n1*n3'}, {l: 'n1*(n2-n3)', r: 'n1*n2-n1*n3'}, {l:'(n1*n2)/(n1*n2)', r:'1'}];
 const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : string[][]) : string[][] => {
 	let matrixCpy : string[][] = matrix.map(row => row.slice());
 	const tempRow = matrix[firstRowIndex].slice(0);
@@ -9,25 +11,25 @@ const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : stri
 }
 
 const multiplyRow = (row : string[], multiplier : string) => {
-	return row.map((val: string) => math.simplify(multiplier + ' * (' + val + ')').toString());
+	return row.map((val: string) => math.simplify(multiplier + ' * (' + val + ')', rules).toString());
 };
 
 const subtractRow = (subtractingRow : string[], targetRow : string[], multiplier = '1') => {
 	const multiple = multiplyRow(subtractingRow, multiplier);
 	return targetRow.map((val : string, index : number) => 
-					math.simplify('(' + val + ') - (' +  multiple[index] + ')').toString());
+					math.simplify('(' + val + ') - (' +  multiple[index] + ')', rules).toString());
 };
 
 const addRow = (addingRow : string[], targetRow : string[], multiplier = '1') => {
 	const multiple = multiplyRow(addingRow, multiplier);
-	return targetRow.map((val, index) => math.simplify('(' + val + ') + (' +  multiple[index] + ')').toString());
+	return targetRow.map((val, index) => math.simplify('(' + val + ') + (' +  multiple[index] + ')', rules).toString());
 };
 
 const dotProductRow = (row1 : string[], row2 : string[]) => (
 	math.simplify(row1.reduce((acc, val, i) => {
 		const val2 = row2[i];
 		return acc + val + '*' + val2 + '+';
-	}, '').slice(0,-1)).toString()
+	}, '').slice(0,-1), rules).toString()
 );
 
 const helperFunctions = {
