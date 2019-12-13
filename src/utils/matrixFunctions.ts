@@ -1,60 +1,50 @@
-import Fraction from 'fraction.js';
-import zip from 'lodash/zip';
+import math from 'mathjs';
+const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : string[][]) : string[][] => {
+	let matrixCpy : string[][] = matrix.map(row => row.slice());
+	const tempRow = matrix[firstRowIndex].slice(0);
+	matrixCpy[firstRowIndex] = matrix[secondRowIndex].slice(0);
+	matrixCpy[secondRowIndex] = tempRow;
+	matrixCpy = matrixCpy.map(row => row.map(val => val));
+	return matrixCpy;
+}
 
-// Elementary Row Operations
-const swapRows = (firstRowIndex, secondRowIndex, matrix) => {
-  let matrixCpy = matrix.map(row => row.slice());
-  const tempRow = matrix[firstRowIndex].slice(0);
-  matrixCpy[firstRowIndex] = matrix[secondRowIndex].slice(0);
-  matrixCpy[secondRowIndex] = tempRow;
-  matrixCpy = matrixCpy.map(row => row.map(val => val));
-  return matrixCpy;
+const multiplyRow = (row : string[], multiplier : string) => {
+	return row.map((val: string) => math.simplify(multiplier + ' * (' + val + ')').toString());
 };
 
-const multiplyRow = (row, multiplier) => (
-  row.map(val => val.mul(multiplier))
-);
-
-const subtractRow = (subtractingRow, targetRow, multiplier = 1) => {
-  const multiple = multiplyRow(subtractingRow, multiplier);
-  return targetRow.map((val, index) => val.sub(multiple[index]));
+const subtractRow = (subtractingRow : string[], targetRow : string[], multiplier = '1') => {
+	const multiple = multiplyRow(subtractingRow, multiplier);
+	return targetRow.map((val : string, index : number) => 
+					math.simplify('(' + val + ') - (' +  multiple[index] + ')').toString());
 };
 
-const addRow = (addingRow, targetRow, multiplier = 1) => {
-  const multiple = multiplyRow(addingRow, multiplier);
-  return targetRow.map((val, index) => val.add(multiple[index]));
+const addRow = (addingRow : string[], targetRow : string[], multiplier = '1') => {
+	const multiple = multiplyRow(addingRow, multiplier);
+	return targetRow.map((val, index) => math.simplify('(' + val + ') + (' +  multiple[index] + ')').toString());
 };
 
-const dotProductRow = (row1, row2) => (
-  row1.reduce((acc, val, i) => {
-    const val2 = row2[i];
-    return acc + val.mul([val2.s * val2.n, val2.d]);
-  }, 0)
+const dotProductRow = (row1 : string[], row2 : string[]) => (
+	math.simplify(row1.reduce((acc, val, i) => {
+		const val2 = row2[i];
+		return acc + val + '*' + val2 + '+';
+	}, '').slice(0,-1)).toString()
 );
 
 const helperFunctions = {
-  getFractionData: matrix => (
-    matrix.map(row => row.map(val => new Fraction(val)))
-  ),
-
-  getStringData: matrix => (
-    matrix.map(row => row.map(val => val.toFraction(false)))
-  ),
-
   // bring a matrix to REF.
-  bringToREF: (matrix) => {
+  bringToREF: (matrix: string[][]) => {
     let matrixCopy = matrix.map(row => row.slice());
     let currentRow = 0;
     let currentColumn = 0;
-    let pivotLocation = { x: currentRow, y: currentColumn };
+    let pivotLocation : ( {x : number, y : number} | null )= { x: currentRow, y: currentColumn };
     /**
      * finds a pivot location by first checking below current column, then checking next
      * column to the right.
      */
-    const findPivotLocation = (startingColumn, startingRow, mat) => {
+    const findPivotLocation = (startingColumn : number, startingRow : number, mat : string[][]) => {
       for (let x = startingColumn; x < mat[0].length; x += 1) {
         for (let y = startingRow; y < mat.length; y += 1) {
-          if (mat[y][x].valueOf() !== 0) {
+          if (mat[y][x].valueOf() !== '0') {
             return { x, y };
           }
         }
@@ -63,10 +53,10 @@ const helperFunctions = {
     };
     // make all entries below pivot zero by performing ERO's
     // ROW = ROW - PIVOT * (multiplier s.t ROW in PIVOT column cancels out).
-    const reduceBelowPivot = (row, i) => {
+    const reduceBelowPivot = (row : string[], i : number) => {
       const index = currentRow + i + 1;
       const multiplier = matrixCopy[index][currentColumn].valueOf();
-      if (multiplier === 0) {
+      if (multiplier === '0') {
         return;
       }
       matrixCopy[index] = subtractRow(matrixCopy[currentRow], matrixCopy[index], multiplier);
@@ -82,8 +72,7 @@ const helperFunctions = {
       // set furthest left pivot to highest row possible, and divide row so pivot is 1
       matrixCopy = swapRows(currentRow, pivotLocation.y, matrixCopy);
       currentColumn = pivotLocation.x;
-      const pivot = matrixCopy[currentRow][pivotLocation.x];
-      const multiplier = [pivot.s * pivot.d, pivot.n];
+      const multiplier = matrixCopy[currentRow][pivotLocation.x];
       matrixCopy[currentRow] = multiplyRow(matrixCopy[currentRow], multiplier);
 
       // reduce all values below pivot in column so that they all become zero
@@ -96,19 +85,19 @@ const helperFunctions = {
   },
 
   // convert a REF matrix to RREF
-  bringToRREF: (matrix) => {
+  bringToRREF: (matrix: string[][]) => {
     if (matrix === undefined || matrix === null) {
       return null;
     }
-    let matrixCopy = matrix.map(row => row.slice());
+    let matrixCopy : string[][] = matrix.map(row => row.slice());
     matrixCopy = helperFunctions.bringToREF(matrix);
-    let currentRow = matrix.length - 1;
+    let currentRow : number = matrix.length - 1;
 
-    const hasPivot = row => row.findIndex(cell => cell.valueOf() === 1);
-    const reduceAbovePivot = pivotLocation => (
+    const hasPivot = (row : string[]) => row.findIndex(cell => cell.valueOf() === '1');
+    const reduceAbovePivot = (pivotIndex : number) => (
       matrixCopy.slice(0, currentRow).forEach((row, index) => {
-        if (row[pivotLocation].valueOf() !== 0) {
-          const multiplier = matrixCopy[index][pivotLocation].valueOf();
+        if (row[pivotIndex] !== '0') {
+          const multiplier = matrixCopy[index][pivotIndex].valueOf();
           matrixCopy[index] = subtractRow(matrixCopy[currentRow], matrixCopy[index], multiplier);
         }
       })
@@ -123,15 +112,18 @@ const helperFunctions = {
     }
     return matrixCopy;
   },
-  add: (firstMatrix, secondMatrix) => (
+
+  add: (firstMatrix : string[][], secondMatrix : string[][]) => (
     firstMatrix.map((row, i) => addRow(row, secondMatrix[i]))
   ),
-  transpose: matrix => zip(...matrix),
-  multiply: (firstMatrix, secondMatrix) => {
+
+  transpose: (matrix : string[][]) => matrix[0].map((col, i) => matrix.map(row => row[i])),
+
+  multiply: (firstMatrix : string[][], secondMatrix : string[][]) => {
     const firstMatrixCopy = firstMatrix.map(row => row.slice());
     const cols = helperFunctions.transpose(secondMatrix);
     const result = firstMatrixCopy.map(row => cols.map(col => dotProductRow(row, col)));
-    return helperFunctions.getFractionData(result);
+    return result;
   },
 };
 

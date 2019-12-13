@@ -10,11 +10,9 @@
 
 # production
 /build
-shell.nix
 
 # misc
 .DS_Store
-.eslintrc.json
 .env.local
 .env.development.local
 .env.test.local

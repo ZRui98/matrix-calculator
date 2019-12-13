@@ -1,3 +1,19 @@
+.invalid{
+	color:red;
+	border:1px solid red;
+}
+
+.valid {
+	border:1px solid black;
+}
+
+.cell {
+	border-radius: 5px;
+	padding: 4px;
+	text-align: center;
+	margin: 1%;
+}
+
 .matrix {
     display: -moz-inline-stack;
     display: inline-block;
@@ -6,36 +22,6 @@
     margin: 1%;
 }
 
-.matrixDisplay {
-	width: 400px;
-	display: inline-block;
-}
-
-.matrixDisplay input {
-	padding:4px;
-	background-color: white;
-	border:1px solid;
-	text-align: center;
-}
-
 .row {
 	width: 100%;
-}
-
-.matrices {
-	text-align: center;
-	width:100%;
-}
-
-.invalid{
-	color:red;
-}
-
-.resultMatrix {
-	text-align: center;
-	width: 100%;
-}
-
-.resultMatrix input {
-	color: black;
 }
