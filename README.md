@@ -1,2 +1,2 @@
-###Upgraded Matrix App 
-Support for symbolic algebra, upgraded to React16 and typescript
+### Upgraded Matrix App 
+Support for symbolic algebra, upgraded to React 16 and typescript
