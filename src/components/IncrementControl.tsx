@@ -16,7 +16,7 @@ const IncrementControl: React.FC<IncrementProps> = ({val, changeVal}) => {
 		  <input type="button" onClick={() => changeVal(val - 1)} value="-1" />
 		  <input
 			className="dimensionInput"
-			type="number"
+			type="text"
 			value={val}
 			onChange={event => validate(event.target.value)}
 		  />
