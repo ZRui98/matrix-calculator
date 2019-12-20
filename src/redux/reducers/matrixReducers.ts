@@ -1,6 +1,7 @@
 import Matrix from '../../objects/Matrix';
 import { AnyAction, Reducer } from 'redux';
-import { CHANGE_ROWS, CHANGE_COLUMNS, CHANGE_CELL } from '../actions/actions';
+import { CHANGE_ROWS, CHANGE_COLUMNS, CHANGE_CELL } from '../actions/matrixActions';
+import { CHANGE_OPERATION } from '../actions/operationActions';
 
 export interface MatricesState {
 	matrices: Matrix[]
@@ -73,7 +74,22 @@ export const dimensionReducer: Reducer<MatricesState> = (state: MatricesState = 
 			let targetIndex: number = matrices.findIndex(matrix => matrix.id === action.id);
 			matrices[targetIndex] = changeCell(matrices[targetIndex], action);
 			break;
-		}	
+		}
+		case CHANGE_OPERATION: {
+			if (action.newOperation === 'RREF' || action.newOperation === 'TRANSPOSE') {
+				if (matrices.length >= 2) {
+					matrices = [matrices[0]];
+				}
+			} else {
+				console.log('here');
+				if (matrices.length <= 1) {
+					let matrix: Matrix = new Matrix(new Array(matrices[0].rows)
+													.fill('0')
+													.map(num => new Array(matrices[0].cols).fill('0')));
+					matrices = [matrices[0], matrix];
+				}
+			}
+		}
 	}
 	return {
 		matrices

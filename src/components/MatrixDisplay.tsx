@@ -1,9 +1,26 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { TextField } from '@material-ui/core';
 import MatrixCell from './MatrixCell';
-import IncrementControl from './IncrementControl';
 import Matrix from '../objects/Matrix';
-import { changeColumns, changeRows } from '../redux/actions/actions';
+import { changeColumns, changeRows } from '../redux/actions/matrixActions';
+import { ThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/styles';
+
+
+const theme = createMuiTheme({
+	palette: {
+		primary: {
+			main:'#000000',
+		},
+	},
+});
+
+const StyledTextField = withStyles({
+	root: {
+		margin: theme.spacing(1),
+		width: 200,
+	}
+})(TextField);
 
 interface MatrixProps {
 	matrix: Matrix;
@@ -19,6 +36,12 @@ const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
 	const style = {
 		width: `${60 / cols}%`,
 	};
+
+	function validate(val: number|string, callback: (newVal: number) => {}) {
+		if (!isNaN(Number(val))) {
+			callback(Number(val));
+		}
+	}
 
 	const display = Array(rows).fill(0).map((row, i) => {
 		const rowCells = Array(cols).fill(0).map((cell, j) => {
@@ -37,11 +60,26 @@ const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
 			</div>
 		);
 	});
-
 	return (
 		<div className={"matrix"}>
-			<IncrementControl val={cols} changeVal={changeCol}/>
-			<IncrementControl val={rows} changeVal={changeRow}/>
+			<ThemeProvider theme={theme}>
+				<StyledTextField
+					variant="outlined"
+					size="small"
+					label="Rows"
+					type="number"
+					value={rows}
+					onChange={event =>{validate(event.target.value, changeRow)}}
+				/>
+				<StyledTextField
+					variant="outlined"
+					size="small"
+					label="Columns"
+					type="number"
+					value={cols}
+					onChange={event=>{validate(event.target.value, changeCol)}}
+				/>
+			</ThemeProvider>
 			{display}
 		</div>
 	);

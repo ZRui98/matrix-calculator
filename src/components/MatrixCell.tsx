@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {simplify} from 'mathjs';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppState  } from '../redux/store';
-import { changeCell } from '../redux/actions/actions';
+import { changeCell } from '../redux/actions/matrixActions';
 import Matrix from '../objects/Matrix'
 
 interface MatrixCellProps {
