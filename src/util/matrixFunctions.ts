@@ -1,6 +1,26 @@
-import math from 'mathjs';
+import { simplify } from 'mathjs';
 
-const rules = [{l: 'n1*(n2+n3)', r: 'n1*n2+n1*n3'}, {l: 'n1*(n2-n3)', r: 'n1*n2-n1*n3'}, {l:'(n1*n2)/(n1*n2)', r:'1'}];
+
+const rules = [
+	{l:'n/n', r:'1'},
+	{l:'(1/n)*n', r:'1'},
+	{l:'(n1/n2)*(n3/n4)', r:'(n1*n3)/(n2*n4)'},
+	{l:'n2/(n2*n1)', r:'1/n1'},
+	{l:'n3*n2/(n2*n1)', r:'n3/n1'},
+	{l: 'n1*(n2+n3)', r: 'n1*n2+n1*n3'},
+	{l: 'n1*(n2-n3)', r: 'n1*n2-n1*n3'},
+	{l:'(n1*n2)/(n1*n2)', r:'1'}
+];
+
+// const printArray = (arr: string[][]) => {
+// 	arr.forEach((row: string[]) => {
+// 		let rowString: string = row.reduce((acc: string, val: string) => acc + ' ' + val);
+// 		console.log(rowString);
+// 	})
+// }
+
+const doubleSimplify = (expression: string) => simplify(simplify(expression,rules));
+
 const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : string[][]) : string[][] => {
 	let matrixCpy : string[][] = matrix.map(row => row.slice());
 	const tempRow = matrix[firstRowIndex].slice(0);
@@ -10,27 +30,29 @@ const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : stri
 	return matrixCpy;
 }
 
-const multiplyRow = (row : string[], multiplier : string) => {
-	return row.map((val: string) => math.simplify(multiplier + ' * (' + val + ')', rules).toString());
+const multiplyRow = (row : string[], multiplier : string): string[] => {
+	multiplier = doubleSimplify(multiplier).toString();
+	let res = row.map((val: string) => doubleSimplify(multiplier + ' * (' + val + ')').toString());
+	return res;
 };
 
-const subtractRow = (subtractingRow : string[], targetRow : string[], multiplier = '1') => {
+const subtractRow = (subtractingRow : string[], targetRow : string[], multiplier = '1'): string[] => {
 	const multiple = multiplyRow(subtractingRow, multiplier);
 	return targetRow.map((val : string, index : number) => 
-					math.simplify('(' + val + ') - (' +  multiple[index] + ')', rules).toString());
+					doubleSimplify('(' + val + ') - (' +  multiple[index] + ')').toString());
 };
 
 const addRow = (addingRow : string[], targetRow : string[], multiplier = '1') => {
 	const multiple = multiplyRow(addingRow, multiplier);
-	return targetRow.map((val, index) => math.simplify('(' + val + ') + (' +  multiple[index] + ')', rules).toString());
+	return targetRow.map((val, index) => doubleSimplify('(' + val + ') + (' +  multiple[index] + ')').toString());
 };
 
-const dotProductRow = (row1 : string[], row2 : string[]) => (
-	math.simplify(row1.reduce((acc, val, i) => {
+const dotProductRow = (row1 : string[], row2 : string[]) => {
+	return doubleSimplify(row1.reduce((acc, val, i) => {
 		const val2 = row2[i];
 		return acc + val + '*' + val2 + '+';
-	}, '').slice(0,-1), rules).toString()
-);
+	}, '').slice(0,-1)).toString()
+};
 
 const helperFunctions = {
   // bring a matrix to REF.
@@ -55,44 +77,45 @@ const helperFunctions = {
     };
     // make all entries below pivot zero by performing ERO's
     // ROW = ROW - PIVOT * (multiplier s.t ROW in PIVOT column cancels out).
-    const reduceBelowPivot = (row : string[], i : number) => {
-      const index = currentRow + i + 1;
-      const multiplier = matrixCopy[index][currentColumn].valueOf();
-      if (multiplier === '0') {
-        return;
-      }
-      matrixCopy[index] = subtractRow(matrixCopy[currentRow], matrixCopy[index], multiplier);
+	const reduceBelowPivot = (row : string[], i : number) => {
+		const index = currentRow + i + 1;
+		const multiplier = matrixCopy[index][currentColumn];
+		if (multiplier === '0') {
+			return;
+		}
+		matrixCopy[index] = subtractRow(matrixCopy[currentRow], matrixCopy[index], multiplier);
     };
 
     // go through all diagonal positions for possible pivot locations until end is reached
     while (currentRow < matrixCopy.length) {
-      pivotLocation = findPivotLocation(currentColumn, currentRow, matrixCopy);
-      // exit on no pivot found, as matrix is in row echelon form
-      if (!pivotLocation) {
-        break;
-      }
-      // set furthest left pivot to highest row possible, and divide row so pivot is 1
-      matrixCopy = swapRows(currentRow, pivotLocation.y, matrixCopy);
-      currentColumn = pivotLocation.x;
-      const multiplier = matrixCopy[currentRow][pivotLocation.x];
-      matrixCopy[currentRow] = multiplyRow(matrixCopy[currentRow], multiplier);
+		pivotLocation = findPivotLocation(currentColumn, currentRow, matrixCopy);
+		// exit on no pivot found, as matrix is in row echelon form
+		if (!pivotLocation) {
+			break;
+		}
+		// set furthest left pivot to highest row possible, and divide row so pivot is 1
+		matrixCopy = swapRows(currentRow, pivotLocation.y, matrixCopy);
+		currentColumn = pivotLocation.x;
+		const pivot = matrixCopy[currentRow][currentColumn];
+		const multiplier = '1/(' + pivot + ')';
+		matrixCopy[currentRow] = multiplyRow(matrixCopy[currentRow], multiplier);
 
-      // reduce all values below pivot in column so that they all become zero
-      matrixCopy.slice(currentRow + 1).forEach(reduceBelowPivot);
+		// reduce all values below pivot in column so that they all become zero
+		matrixCopy.slice(currentRow + 1).forEach(reduceBelowPivot);
+		currentRow += 1;
+		currentColumn += 1;
+	}
 
-      currentRow += 1;
-      currentColumn += 1;
-    }
     return matrixCopy;
   },
 
   // convert a REF matrix to RREF
-  bringToRREF: (matrix: string[][]) => {
+  bringToRREF: (matrix: string[][]): string[][] => {
     if (matrix === undefined || matrix === null) {
-      return null;
+      return [[]];
     }
     let matrixCopy : string[][] = matrix.map(row => row.slice());
-    matrixCopy = helperFunctions.bringToREF(matrix);
+	matrixCopy = helperFunctions.bringToREF(matrix);
     let currentRow : number = matrix.length - 1;
 
     const hasPivot = (row : string[]) => row.findIndex(cell => cell.valueOf() === '1');

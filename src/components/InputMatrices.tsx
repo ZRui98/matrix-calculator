@@ -1,7 +1,7 @@
 import React from 'react';
-import MatrixDisplay from './MatrixDisplay';
-import { AppState  } from '../redux/store';
 import { useSelector } from 'react-redux';
+import MatrixDisplay from './MatrixDisplay';
+import { AppState  } from '../store';
 
 const InputMatrices: React.FC = () => {
 	const matrices = useSelector((state: AppState) => state.matricesState.matrices);

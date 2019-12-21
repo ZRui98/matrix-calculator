@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { TextField } from '@material-ui/core';
 import MatrixCell from './MatrixCell';
 import Matrix from '../objects/Matrix';
-import { changeColumns, changeRows } from '../redux/actions/matrixActions';
+import { changeColumns, changeRows } from '../store/actions/matrixActions';
 import { ThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/styles';
 
 
@@ -24,6 +24,7 @@ const StyledTextField = withStyles({
 
 interface MatrixProps {
 	matrix: Matrix;
+	disabled?: boolean;
 }
 
 const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
@@ -42,6 +43,7 @@ const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
 			callback(Number(val));
 		}
 	}
+	if (props.disabled) console.log(props.matrix)
 
 	const display = Array(rows).fill(0).map((row, i) => {
 		const rowCells = Array(cols).fill(0).map((cell, j) => {
@@ -52,6 +54,7 @@ const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
 					row={i}
 					col={j}
 					key={props.matrix.id+i+"_"+j}
+					disabled={props.disabled ? true : false}
 				/>)
 		});
 		return (
@@ -60,8 +63,7 @@ const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
 			</div>
 		);
 	});
-	return (
-		<div className={"matrix"}>
+	const incrementControls = (
 			<ThemeProvider theme={theme}>
 				<StyledTextField
 					variant="outlined"
@@ -80,6 +82,10 @@ const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
 					onChange={event=>{validate(event.target.value, changeCol)}}
 				/>
 			</ThemeProvider>
+	);
+	return (
+		<div className={"matrix"}>
+			{!props.disabled && incrementControls}
 			{display}
 		</div>
 	);

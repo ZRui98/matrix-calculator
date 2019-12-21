@@ -1,6 +1,7 @@
 export const CHANGE_CELL = 'CHANGE_CELL';
 export const CHANGE_ROWS = 'CHANGE_ROWS';
 export const CHANGE_COLUMNS = 'CHANGE_COLUMNS';
+export const CALCULATE ='CALCULATE';
 
 export interface ChangeCellAction {
 	type: typeof CHANGE_CELL,
@@ -42,4 +43,14 @@ export const changeRows = (change: number, matrixId: string): ChangeDimensionsAc
 	type: CHANGE_ROWS,
 	id: matrixId,
 	rowChange: change
+})
+
+interface CalculateAction {
+	type: typeof CALCULATE,
+	operation: string
+}
+
+export const calculate = (operation: string): CalculateAction => ({
+	type: CALCULATE,
+	operation: operation
 })

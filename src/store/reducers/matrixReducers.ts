@@ -1,14 +1,18 @@
 import Matrix from '../../objects/Matrix';
 import { AnyAction, Reducer } from 'redux';
-import { CHANGE_ROWS, CHANGE_COLUMNS, CHANGE_CELL } from '../actions/matrixActions';
+import { CHANGE_ROWS, CHANGE_COLUMNS, CHANGE_CELL, CALCULATE } from '../actions/matrixActions';
 import { CHANGE_OPERATION } from '../actions/operationActions';
+import { RREF, ADD, MULTIPLY, TRANSPOSE } from '../../util/operations';
+import MatrixFunctions from '../../util/matrixFunctions';
 
 export interface MatricesState {
-	matrices: Matrix[]
+	matrices: Matrix[],
+	answerMatrix : Matrix|null
 }
 
 const initialState: MatricesState = {
-	matrices: [new Matrix(new Array(3).fill('0').map(num => new Array(3).fill('0')))]
+	matrices: [new Matrix(new Array(3).fill('0').map(num => new Array(3).fill('0')))],
+	answerMatrix: null
 }
 
 const changeCell = (matrix: Matrix, action: AnyAction) => {
@@ -58,8 +62,19 @@ const resizeCol = (matrix: Matrix, newSize: number): Matrix => {
 	return matrix;
 }
 
+const changeMatrices = (newOperation: string, matrices: Matrix[]): Matrix[] => {
+	if (newOperation === RREF || newOperation === TRANSPOSE) {
+		return [matrices[0]];
+	} else {
+		let newMatrix: Matrix = new Matrix(new Array(matrices[0].rows)
+				.fill('0')
+				.map(num => new Array(matrices[0].cols).fill('0')));
+		return [matrices[0], newMatrix];
+	}
+}
+
 export const dimensionReducer: Reducer<MatricesState> = (state: MatricesState = initialState, action: AnyAction): MatricesState => {
-	let matrices: Matrix[] = state.matrices;
+	let { matrices, answerMatrix } = state;
 	switch (action.type) {
 		case CHANGE_ROWS: {
 			matrices = matrices.map(matrix => matrix.id === action.id ? resizeRow(matrix, action.rowChange) : matrix );
@@ -76,23 +91,36 @@ export const dimensionReducer: Reducer<MatricesState> = (state: MatricesState = 
 			break;
 		}
 		case CHANGE_OPERATION: {
-			if (action.newOperation === 'RREF' || action.newOperation === 'TRANSPOSE') {
-				if (matrices.length >= 2) {
-					matrices = [matrices[0]];
+			matrices = changeMatrices(action.newOperation, matrices);
+			break;
+		}
+		case CALCULATE: {
+			let answerData: string[][] = [[]];
+			switch(action.operation){
+				case RREF: {
+					try{
+						answerData = MatrixFunctions.bringToRREF(matrices[0].matrixData);
+					} catch{
+						console.log('error!');
+					}
+					break;
 				}
-			} else {
-				console.log('here');
-				if (matrices.length <= 1) {
-					let matrix: Matrix = new Matrix(new Array(matrices[0].rows)
-													.fill('0')
-													.map(num => new Array(matrices[0].cols).fill('0')));
-					matrices = [matrices[0], matrix];
+				case ADD: {
+					break;
+				}
+				case MULTIPLY: {
+					break;
+				}
+				case TRANSPOSE: {
+					break;
 				}
 			}
+			answerMatrix = new Matrix(answerData);
+			break;
 		}
 	}
 	return {
-		matrices
+		matrices,
+		answerMatrix
 	};
 }
-

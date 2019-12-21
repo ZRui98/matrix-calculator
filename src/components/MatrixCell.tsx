@@ -1,21 +1,24 @@
 import React, {useState} from 'react';
 import {simplify} from 'mathjs';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppState  } from '../redux/store';
-import { changeCell } from '../redux/actions/matrixActions';
+import { AppState  } from '../store';
+import { changeCell } from '../store/actions/matrixActions';
 import Matrix from '../objects/Matrix'
 
 interface MatrixCellProps {
 	id: string,
 	row: number,
 	col: number,
+	disabled: boolean,
 	style?: React.CSSProperties
 }
 
-const MatrixCell: React.FC<MatrixCellProps> = (props) => {
+const MatrixCell: React.FC<MatrixCellProps> = (props: MatrixCellProps) => {
 	const [isValid, setValid] = useState(true);
 	const value: string = useSelector((state: AppState) => {
-		const matrix: Matrix | undefined = state.matricesState.matrices.find(matrix => matrix.id === props.id);
+		let matrix: Matrix | undefined | null = state.matricesState.matrices.find(matrix => matrix.id === props.id);
+		if (!matrix)
+			matrix = state.matricesState.answerMatrix;
 		if (!matrix) return '0';
 		return matrix.matrixData[props.row][props.col];
 	});
@@ -38,6 +41,7 @@ const MatrixCell: React.FC<MatrixCellProps> = (props) => {
 			type="text"
 			value={value}
 			style={props.style}
+			disabled={props.disabled}
 			onChange={(e: React.ChangeEvent<HTMLInputElement>) => {validate(e.target.value)}}
 			className={isValid ? 'cell valid' : 'cell invalid'}
 		/>
