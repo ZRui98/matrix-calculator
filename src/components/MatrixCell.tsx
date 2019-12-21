@@ -32,6 +32,7 @@ const MatrixCell: React.FC<MatrixCellProps> = (props: MatrixCellProps) => {
 		} catch(e) {
 			val = false;
 		}
+		val = val ? !(/^\s+$/.test(cellValue) || cellValue === '') : val;
 		setValid(val);
 		changeCellVal(cellValue);
 	}

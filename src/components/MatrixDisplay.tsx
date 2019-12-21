@@ -43,7 +43,6 @@ const MatrixDisplay: React.FC<MatrixProps> = (props: MatrixProps) => {
 			callback(Number(val));
 		}
 	}
-	if (props.disabled) console.log(props.matrix)
 
 	const display = Array(rows).fill(0).map((row, i) => {
 		const rowCells = Array(cols).fill(0).map((cell, j) => {
