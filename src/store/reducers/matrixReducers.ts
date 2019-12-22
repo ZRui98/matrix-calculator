@@ -7,12 +7,14 @@ import MatrixFunctions from '../../util/matrixFunctions';
 
 export interface MatricesState {
 	matrices: Matrix[],
-	answerMatrix : Matrix | null
+	answerMatrix : Matrix | null,
+	hasError: boolean
 }
 
 const initialState: MatricesState = {
 	matrices: [new Matrix(new Array(3).fill('0').map(num => new Array(3).fill('0')))],
-	answerMatrix: null
+	answerMatrix: null,
+	hasError: false
 }
 
 const changeCell = (matrix: Matrix, action: AnyAction) => {
@@ -75,25 +77,32 @@ const changeMatrices = (newOperation: string, matrices: Matrix[]): Matrix[] => {
 const calculateAnswer = (operation: string, matrices: Matrix[]): string[][] | null => {
 	switch(operation) {
 		case RREF: {
-			try{
+			try {
 				return MatrixFunctions.bringToRREF(matrices[0].matrixData);
-			} catch{
-				console.log('error!');
+			} catch {
 				return null;
 			}
 		}
 		case MULTIPLY: {
-			return MatrixFunctions.multiply(matrices[0].matrixData, matrices[1].matrixData);
+			try {
+				return MatrixFunctions.multiply(matrices[0].matrixData, matrices[1].matrixData);
+			} catch {
+				return null;
+			}
 		}
 		case TRANSPOSE: {
-			return MatrixFunctions.transpose(matrices[0].matrixData);
+			try {
+				return MatrixFunctions.transpose(matrices[0].matrixData);
+			} catch {
+				return null;
+			}
 		}
 	}
 	return null;
 }
 
 export const dimensionReducer: Reducer<MatricesState> = (state: MatricesState = initialState, action: AnyAction): MatricesState => {
-	let { matrices, answerMatrix } = state;
+	let { matrices, answerMatrix, hasError } = state;
 	switch (action.type) {
 		case CHANGE_ROWS: {
 			let targetIndex = matrices.findIndex(matrix => matrix.id === action.id);
@@ -128,16 +137,20 @@ export const dimensionReducer: Reducer<MatricesState> = (state: MatricesState = 
 		}
 		case CHANGE_OPERATION: {
 			matrices = changeMatrices(action.newOperation, matrices);
+			answerMatrix = null;
+			hasError = false;
 			break;
 		}
 		case CALCULATE: {
 			let answerData: string[][] | null = calculateAnswer(action.operation, matrices);
+			hasError = answerData === null ? true : false;
 			answerMatrix = answerData === null ? null : new Matrix(answerData);
 			break;
 		}
 	}
 	return {
 		matrices,
-		answerMatrix
+		answerMatrix,
+		hasError
 	};
 }

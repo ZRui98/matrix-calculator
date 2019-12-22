@@ -12,6 +12,13 @@
 	padding: 4px;
 	text-align: center;
 	margin: 4px;
+	color: #000000;
+	background-color: #FFFFFF;
+}
+
+.cell :disabled{
+	color: #000000;
+	background-color: #FFFFFF;
 }
 
 .matrix {

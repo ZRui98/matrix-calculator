@@ -42,8 +42,7 @@ const MatrixCell: React.FC<MatrixCellProps> = (props: MatrixCellProps) => {
 			type="text"
 			value={value}
 			style={props.style}
-			disabled={props.disabled}
-			onChange={(e: React.ChangeEvent<HTMLInputElement>) => {validate(e.target.value)}}
+			onChange={props.disabled ? (e: React.ChangeEvent<HTMLInputElement>) => {} : (e: React.ChangeEvent<HTMLInputElement>) => {validate(e.target.value)}}
 			className={isValid ? 'cell valid' : 'cell invalid'}
 		/>
 	);
