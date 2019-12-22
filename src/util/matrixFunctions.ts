@@ -15,13 +15,6 @@ const rules = [
 	{l:'(n1*n2)/(n1*n2)', r:'1'}
 ];
 
-// const printArray = (arr: string[][]) => {
-// 	arr.forEach((row: string[]) => {
-// 		let rowString: string = row.reduce((acc: string, val: string) => acc + ' ' + val);
-// 		console.log(rowString);
-// 	})
-// }
-
 const doubleSimplify = (expression: string) => simplify(simplify(simplify(expression,rules)),rules);
 
 const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : string[][]) : string[][] => {
@@ -34,19 +27,8 @@ const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : stri
 }
 
 const multiplyRow = (row : string[], multiplier : string): string[] => {
-	console.log('multiplier');
-	console.log(multiplier);
 	multiplier = doubleSimplify(multiplier).toString();
-	console.log(multiplier);
-	let res = row.map((val: string) => {
-		console.log('before');
-		console.log(val);
-		let out: string = doubleSimplify(multiplier + ' * (' + val + ')').toString();
-		console.log('after');
-		console.log(out);
-		return out;
-	});
-	return res;
+	return row.map((val: string) => doubleSimplify(multiplier + ' * (' + val + ')').toString());
 };
 
 const divideRow = (row: string[], divisor: string): string[] => {
