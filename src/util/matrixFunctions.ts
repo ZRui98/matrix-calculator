@@ -3,12 +3,15 @@ import { simplify } from 'mathjs';
 
 const rules = [
 	{l:'n/n', r:'1'},
-	{l:'(1/n)*n', r:'1'},
+	{l:'n*(1/n)', r:'1'},
+    {l:'n1*n3/n2-n1/n2*n3',r: '0'},
 	{l:'(n1/n2)*(n3/n4)', r:'(n1*n3)/(n2*n4)'},
 	{l:'n2/(n2*n1)', r:'1/n1'},
 	{l:'n3*n2/(n2*n1)', r:'n3/n1'},
 	{l: 'n1*(n2+n3)', r: 'n1*n2+n1*n3'},
+	{l: 'n1*n2+n1*n3', r: 'n1*(n2+n3)'},
 	{l: 'n1*(n2-n3)', r: 'n1*n2-n1*n3'},
+	{l: 'n1*n2-n1*n3', r: 'n1*(n2-n3)'},
 	{l:'(n1*n2)/(n1*n2)', r:'1'}
 ];
 
@@ -19,7 +22,7 @@ const rules = [
 // 	})
 // }
 
-const doubleSimplify = (expression: string) => simplify(simplify(expression,rules));
+const doubleSimplify = (expression: string) => simplify(simplify(simplify(expression,rules)),rules);
 
 const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : string[][]) : string[][] => {
 	let matrixCpy : string[][] = matrix.map(row => row.slice());
@@ -31,13 +34,28 @@ const swapRows = (firstRowIndex : number, secondRowIndex : number, matrix : stri
 }
 
 const multiplyRow = (row : string[], multiplier : string): string[] => {
+	console.log('multiplier');
+	console.log(multiplier);
 	multiplier = doubleSimplify(multiplier).toString();
-	let res = row.map((val: string) => doubleSimplify(multiplier + ' * (' + val + ')').toString());
+	console.log(multiplier);
+	let res = row.map((val: string) => {
+		console.log('before');
+		console.log(val);
+		let out: string = doubleSimplify(multiplier + ' * (' + val + ')').toString();
+		console.log('after');
+		console.log(out);
+		return out;
+	});
 	return res;
 };
 
-const subtractRow = (subtractingRow : string[], targetRow : string[], multiplier = '1'): string[] => {
-	const multiple = multiplyRow(subtractingRow, multiplier);
+const divideRow = (row: string[], divisor: string): string[] => {
+	divisor = doubleSimplify(divisor).toString();
+	return row.map((val: string) => doubleSimplify('(' + val + ') / (' + divisor + ')').toString());
+}
+
+const subtractRowM = (subtractingRow : string[], targetRow : string[], multiplier: string = '1'): string[] => {
+	const multiple = multiplier === '1' ? subtractingRow : multiplyRow(subtractingRow, multiplier);
 	return targetRow.map((val : string, index : number) => 
 					doubleSimplify('(' + val + ') - (' +  multiple[index] + ')').toString());
 };
@@ -83,7 +101,7 @@ const helperFunctions = {
 		if (multiplier === '0') {
 			return;
 		}
-		matrixCopy[index] = subtractRow(matrixCopy[currentRow], matrixCopy[index], multiplier);
+		matrixCopy[index] = subtractRowM(matrixCopy[currentRow], matrixCopy[index], multiplier);
     };
 
     // go through all diagonal positions for possible pivot locations until end is reached
@@ -97,8 +115,8 @@ const helperFunctions = {
 		matrixCopy = swapRows(currentRow, pivotLocation.y, matrixCopy);
 		currentColumn = pivotLocation.x;
 		const pivot = matrixCopy[currentRow][currentColumn];
-		const multiplier = '1/(' + pivot + ')';
-		matrixCopy[currentRow] = multiplyRow(matrixCopy[currentRow], multiplier);
+		const divider = pivot;
+		matrixCopy[currentRow] = divideRow(matrixCopy[currentRow], divider);
 
 		// reduce all values below pivot in column so that they all become zero
 		matrixCopy.slice(currentRow + 1).forEach(reduceBelowPivot);
@@ -123,7 +141,7 @@ const helperFunctions = {
       matrixCopy.slice(0, currentRow).forEach((row, index) => {
         if (row[pivotIndex] !== '0') {
           const multiplier = matrixCopy[index][pivotIndex].valueOf();
-          matrixCopy[index] = subtractRow(matrixCopy[currentRow], matrixCopy[index], multiplier);
+          matrixCopy[index] = subtractRowM(matrixCopy[currentRow], matrixCopy[index], multiplier);
         }
       })
     );
@@ -144,7 +162,7 @@ const helperFunctions = {
 
   transpose: (matrix : string[][]) => matrix[0].map((col, i) => matrix.map(row => row[i])),
 
-  multiply: (firstMatrix : string[][], secondMatrix : string[][]) => {
+  multiply: (firstMatrix : string[][], secondMatrix : string[][]): string[][] => {
     const firstMatrixCopy = firstMatrix.map(row => row.slice());
     const cols = helperFunctions.transpose(secondMatrix);
     const result = firstMatrixCopy.map(row => cols.map(col => dotProductRow(row, col)));

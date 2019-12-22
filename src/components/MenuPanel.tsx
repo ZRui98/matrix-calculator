@@ -6,6 +6,7 @@ import { AppState } from '../store';
 import { changeOperation } from '../store/actions/operationActions';
 import { calculate } from '../store/actions/matrixActions';
 import { withStyles, createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { RREF, MULTIPLY, TRANSPOSE } from '../util/operations';
 
 const StyledToggleButton = withStyles((theme: Theme) => ({
 	root: {
@@ -40,7 +41,7 @@ const MenuPanel: React.FC = () => {
 		dispatch(calculate(selectedOperation));
 	}
 
-	const options : JSX.Element[] = ['RREF','ADDITION','MULTIPLICATION','TRANSPOSE'].map((opt: string) => {
+	const options : JSX.Element[] = [RREF, MULTIPLY, TRANSPOSE].map((opt: string) => {
 		const selected: boolean = selectedOperation === opt ? true : false;
 		return (
 			<StyledToggleButton

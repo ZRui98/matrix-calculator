@@ -2,12 +2,12 @@ import Matrix from '../../objects/Matrix';
 import { AnyAction, Reducer } from 'redux';
 import { CHANGE_ROWS, CHANGE_COLUMNS, CHANGE_CELL, CALCULATE } from '../actions/matrixActions';
 import { CHANGE_OPERATION } from '../actions/operationActions';
-import { RREF, ADD, MULTIPLY, TRANSPOSE } from '../../util/operations';
+import { RREF, MULTIPLY, TRANSPOSE } from '../../util/operations';
 import MatrixFunctions from '../../util/matrixFunctions';
 
 export interface MatricesState {
 	matrices: Matrix[],
-	answerMatrix : Matrix|null
+	answerMatrix : Matrix | null
 }
 
 const initialState: MatricesState = {
@@ -39,7 +39,6 @@ const resizeRow = (matrix: Matrix, newSize: number): Matrix => {
 }
 
 const resizeCol = (matrix: Matrix, newSize: number): Matrix => {
-
 	if (newSize >= 0) {
 		matrix.cols = newSize;
 	}
@@ -73,19 +72,56 @@ const changeMatrices = (newOperation: string, matrices: Matrix[]): Matrix[] => {
 	}
 }
 
+const calculateAnswer = (operation: string, matrices: Matrix[]): string[][] | null => {
+	switch(operation) {
+		case RREF: {
+			try{
+				return MatrixFunctions.bringToRREF(matrices[0].matrixData);
+			} catch{
+				console.log('error!');
+				return null;
+			}
+		}
+		case MULTIPLY: {
+			return MatrixFunctions.multiply(matrices[0].matrixData, matrices[1].matrixData);
+		}
+		case TRANSPOSE: {
+			return MatrixFunctions.transpose(matrices[0].matrixData);
+		}
+	}
+	return null;
+}
+
 export const dimensionReducer: Reducer<MatricesState> = (state: MatricesState = initialState, action: AnyAction): MatricesState => {
 	let { matrices, answerMatrix } = state;
 	switch (action.type) {
 		case CHANGE_ROWS: {
-			matrices = matrices.map(matrix => matrix.id === action.id ? resizeRow(matrix, action.rowChange) : matrix );
+			let targetIndex = matrices.findIndex(matrix => matrix.id === action.id);
+			matrices = matrices.map((matrix, index) => {
+				if (targetIndex === index) {
+					return resizeRow(matrix, action.rowChange);
+				} else if (targetIndex - 1 === index) {
+					return resizeCol(matrix, action.rowChange);	
+				} else {
+					return matrix;
+				}
+			});
 			break;
 		}
 		case CHANGE_COLUMNS: {
-			matrices = matrices.map(matrix => matrix.id === action.id ? resizeCol(matrix, action.columnChange) : matrix )
+			let targetIndex = matrices.findIndex(matrix => matrix.id === action.id);
+			matrices = matrices.map((matrix, index) => {
+				if (targetIndex === index) {
+					return resizeCol(matrix, action.columnChange);
+				} else if (targetIndex + 1 === index) {
+					return resizeRow(matrix, action.columnChange);	
+				} else {
+					return matrix;
+				}
+			})
 			break;
 		}
 		case CHANGE_CELL: {
-			// matrices = matrices.map(matrix => matrix.id === action.id ? changeCell(matrix, action) : matrix )
 			let targetIndex: number = matrices.findIndex(matrix => matrix.id === action.id);
 			matrices[targetIndex] = changeCell(matrices[targetIndex], action);
 			break;
@@ -95,27 +131,8 @@ export const dimensionReducer: Reducer<MatricesState> = (state: MatricesState = 
 			break;
 		}
 		case CALCULATE: {
-			let answerData: string[][] = [[]];
-			switch(action.operation){
-				case RREF: {
-					try{
-						answerData = MatrixFunctions.bringToRREF(matrices[0].matrixData);
-					} catch{
-						console.log('error!');
-					}
-					break;
-				}
-				case ADD: {
-					break;
-				}
-				case MULTIPLY: {
-					break;
-				}
-				case TRANSPOSE: {
-					break;
-				}
-			}
-			answerMatrix = new Matrix(answerData);
+			let answerData: string[][] | null = calculateAnswer(action.operation, matrices);
+			answerMatrix = answerData === null ? null : new Matrix(answerData);
 			break;
 		}
 	}
