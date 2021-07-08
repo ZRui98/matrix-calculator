@@ -13,7 +13,7 @@
     "@types/node": "^12.12.36",
     "@types/react": "^16.9.34",
     "@types/react-dom": "^16.9.6",
-    "@types/react-redux": "^7.1.7",
+    "@types/react-redux": "^7.1.17",
     "@types/uuid": "^3.4.8",
     "gh-pages": "^2.2.0",
     "mathjs": "^6.6.4",
